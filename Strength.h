@@ -27,7 +27,7 @@ typedef struct
     int      MovesCount;
     int      Width, Height;
     int      CurrentLevel;
-    unsigned int*     Score;
+    int*     Score;
     Tiles**  Map;
     time_t   Start;
     char     Myflag;

@@ -40,6 +40,7 @@ void Set_Iscleared(Strength* game)
 void Game_intro()
 {
     FILE* fp;
+    char* a = malloc(sizeof(char) * MAX_TEXT_SIZE);
     dpc_set_font_background_color(dpc_BACKGROUND_BLACK);
 
     dpc_set_font_color(dpc_GREEN);
@@ -59,7 +60,6 @@ void Game_intro()
 
     fp = fopen("assets/Results.txt", "rt");
 
-    char* a = malloc(sizeof(char) * MAX_TEXT_SIZE);
     if (a == NULL)
     {
         return;
@@ -88,6 +88,8 @@ void Game_setup(Strength* game) { game->Score = malloc(sizeof(int) * MAX_LEVEL);
 void Map_setup(Strength* game)
 {
     int i;
+    char* c1 = malloc(sizeof(char) * MAX_TEXT_SIZE);
+    char* c2 = malloc(sizeof(char) * MAX_TEXT_SIZE);
 
     if (game->CurrentLevel > MAX_LEVEL)
     {
@@ -106,13 +108,11 @@ void Map_setup(Strength* game)
         free(game->Map);
     }
 
-    char* c1 = malloc(sizeof(char) * MAX_TEXT_SIZE);
     if (c1 == NULL)
     {
         printf("There is No File. \n");
         return;
     }
-    char* c2 = malloc(sizeof(char) * MAX_TEXT_SIZE);
     if (c2 == NULL)
     {
         printf("There is No File. \n");
@@ -143,9 +143,8 @@ void Map_setup(Strength* game)
 
 void Create_map(Strength* game)
 {
-    int i=0;
+    int i;
     FILE* fp;
-
     char* a = malloc(sizeof(char) * MAX_TEXT_SIZE);
 
     fp = fopen(game->File_Name, "rt");
@@ -160,13 +159,13 @@ void Create_map(Strength* game)
     {
         while (!feof(fp))
         {
-            fgets(a, MAX_TEXT_SIZE, fp);
+            a=fgets(a, MAX_TEXT_SIZE, fp);
 
             if (atoi(a) != 0)
             {
                 game->Width = atoi(a);
-                fgets(a, MAX_TEXT_SIZE, fp);
-                fgets(a, MAX_TEXT_SIZE, fp);
+                a=fgets(a, MAX_TEXT_SIZE, fp);
+                a=fgets(a, MAX_TEXT_SIZE, fp);
                 game->Height = atoi(a);
             }
         }
@@ -176,7 +175,7 @@ void Create_map(Strength* game)
         Set_Flag(game, Set_Isdone);
         return;
     }
-    game->Map = (Tiles**)malloc(sizeof(Tiles*) * game->Height); 
+    game->Map = (Tiles**)malloc(sizeof(Tiles*) * (long unsigned int)game->Height); 
     if (game->Map == NULL)
     {
         Set_Flag(game, Set_Isdone);
@@ -184,7 +183,7 @@ void Create_map(Strength* game)
     }
     for (i = 0; i < game->Height; i++) 
     {
-        game->Map[i] = (Tiles*)malloc(sizeof(Tiles) * game->Width);
+        game->Map[i] = (Tiles*)malloc(sizeof(Tiles) * (long unsigned int)game->Width);
         if (game->Map[i] == NULL)
         {
             Set_Flag(game, Set_Isdone);
@@ -199,8 +198,9 @@ void Create_map(Strength* game)
 void Map_reset(Strength* game)
 {
     FILE* fp;
+    int i;
+    int j;
     dpc_clear_console_screen();
-    int i, j;
 
     fp = fopen(game->File_Name, "rt");
 
@@ -333,7 +333,8 @@ void Go_to_next_level(Strength* game)
 
 void Draw_map(Strength* game)
 {
-    int i, j;
+    int i;
+    int j;
     dpc_move_cursor(0, game->Height+1);
     dpc_set_font_color(dpc_LIGHTMAGENTA);
     printf("Moves: %d\n", game->MovesCount);

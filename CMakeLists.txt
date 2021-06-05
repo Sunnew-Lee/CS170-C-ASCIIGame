@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(c-ascii-game-sunwoo-lee)
+project(Strength)
 
-set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 if(MSVC)
@@ -11,4 +10,4 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror -std=c89 -Wno-implicit-fallthrough)
 endif()
 
-add_executable(c-ascii-game-sunwoo-lee main.c dp_console.c Strength.c)
+add_executable(Strength main.c dp_console.c Strength.c)

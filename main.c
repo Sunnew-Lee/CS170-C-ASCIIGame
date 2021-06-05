@@ -18,10 +18,13 @@ int main(void)
 #ifdef _WIN32
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-    Strength game = { .Map = NULL,.MovesCount = 0,.CurrentLevel = 1,.Myflag = 0 };
-    const bool   hide_cursor = true;
+    Strength game = { 0 };
+    game.Map = NULL;
+    game.MovesCount = 0;
+    game.CurrentLevel = 1;
+    game.Myflag = 0;
 
-    dpc_startup(hide_cursor);
+    dpc_startup(true);
 
     Game_intro();
     Game_setup(&game);
