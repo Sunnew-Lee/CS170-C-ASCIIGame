@@ -1,6 +1,6 @@
 # ASCII Game in C Assignment
 ## 1. Your name, project name, course name, term
-- Name: sunwoo.lee / team member: hyun.kang
+- Name: hyun.kang / sunwoo.lee
 - Project Name: ASCII Game in C
 - Course Name: CS170
 - Term: Spring 2021
