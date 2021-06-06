@@ -22,22 +22,19 @@
 char IsDone=1<<0;
 char IsCleared=1<<1;
 
-void Set_Flag(Strength* game, FuncPtr func)
-{
-    func(game);
-}
+void Set_Flag(char* myflag, VoidFuncPtr func) { func(myflag); }
 
-void Set_Isdone(Strength* game)
-{
-    game->Myflag |= IsDone;
-}
+bool Get_Flag(char* myflag, BoolFuncPtr func) { return func(myflag); }
 
-void Set_Iscleared(Strength* game)
-{
-    game->Myflag |= IsCleared;
-}
+void Set_Isdone(char* myflag) { *myflag |= IsDone; }
 
-void Game_intro()
+void Set_Iscleared(char* myflag) { *myflag |= IsCleared; }
+
+bool Get_Isdone(char* myflag) { return (*myflag & IsDone); }
+
+bool Get_Iscleared(char* myflag) { return (*myflag & IsCleared); }
+
+void Read_results()
 {
     FILE* fp;
     char* a = malloc(sizeof(char) * MAX_TEXT_SIZE);
@@ -83,7 +80,20 @@ void Game_intro()
     dpc_wait_for_anykey("Press any key to start.\n");
 }
 
-void Game_setup(Strength* game) { game->Score = malloc(sizeof(int) * MAX_LEVEL); }
+void Game_setup(Strength* game)
+{
+    game->Player_X = 0;
+    game->Player_Y = 0;
+    game->MovesCount = 0;
+    game->Width = 0;
+    game->Height = 0;
+    game->CurrentLevel = 1;
+    game->Score = malloc(sizeof(int) * MAX_LEVEL);
+    game->Map = NULL;
+    game->Start = 0;
+    game->Myflag = 0;
+    game->File_Name = NULL;
+}
 
 void Map_setup(Strength* game)
 {
@@ -94,8 +104,8 @@ void Map_setup(Strength* game)
     if (game->CurrentLevel > MAX_LEVEL)
     {
         game->CurrentLevel = MAX_LEVEL;
-        Set_Flag(game, Set_Isdone);
-        Set_Flag(game, Set_Iscleared);
+        Set_Flag(&game->Myflag, Set_Isdone);
+        Set_Flag(&game->Myflag, Set_Iscleared);
         return;
     }
 
@@ -127,9 +137,6 @@ void Map_setup(Strength* game)
 
     strcpy(game->File_Name, "assets/Map");
     sprintf(c1, "%d", game->CurrentLevel);
-
-
-
     strcpy(c2, ".txt");
 
     strcat(game->File_Name, c1);
@@ -139,6 +146,7 @@ void Map_setup(Strength* game)
 
     Create_map(game);
     Map_reset(game);
+    game->Start = clock();
 }
 
 void Create_map(Strength* game)
@@ -172,13 +180,13 @@ void Create_map(Strength* game)
     }
     if (game->Width <= 0 || game->Height <= 0) {
         printf("Illegal number of rows or columns!\n");
-        Set_Flag(game, Set_Isdone);
+        Set_Flag(&game->Myflag, Set_Isdone);
         return;
     }
     game->Map = (Tiles**)malloc(sizeof(Tiles*) * (long unsigned int)game->Height); 
     if (game->Map == NULL)
     {
-        Set_Flag(game, Set_Isdone);
+        Set_Flag(&game->Myflag, Set_Isdone);
         return;
     }
     for (i = 0; i < game->Height; i++) 
@@ -186,7 +194,7 @@ void Create_map(Strength* game)
         game->Map[i] = (Tiles*)malloc(sizeof(Tiles) * (long unsigned int)game->Width);
         if (game->Map[i] == NULL)
         {
-            Set_Flag(game, Set_Isdone);
+            Set_Flag(&game->Myflag, Set_Isdone);
             return;
         }
     }
@@ -210,7 +218,7 @@ void Map_reset(Strength* game)
         {
             switch (fgetc(fp))
             {
-            case 'P':game->Map[i][j] = ROAD; game->PlayerX = j; game->PlayerY = i; break;
+            case 'P':game->Map[i][j] = ROAD; game->Player_X = j; game->Player_Y = i; break;
             case ' ':game->Map[i][j] = ROAD; break;
             case '#':game->Map[i][j] = WALL; break;
             case '@':game->Map[i][j] = ROCK; break;
@@ -222,112 +230,115 @@ void Map_reset(Strength* game)
     }
     fclose(fp);
     game->MovesCount = 0;
-    game->Start = clock();
-
 }
 
 
-bool Game_update(Strength* game, int key_code)
+bool Game_update(Strength* game, int key)
 {
     bool did_move = false;
-    int  new_x = game->PlayerX;
-    int  new_y = game->PlayerY;
+    int  new_pos_X = game->Player_X;
+    int  new_pos_Y = game->Player_Y;
 
-    if (key_code == ESCAPE)
+    if (key == ESCAPE)
     {
-        Set_Flag(game, Set_Isdone);
+        Set_Flag(&game->Myflag, Set_Isdone);
         return false;
     }
-    else if (key_code == 'R' || key_code == ('R' ^ (1 << 5)))
+    else if (key == 'R' || key == ('R' ^ (1 << 5)))
     {
         Map_reset(game);
         return true;
     }
 
-    switch (key_code)
+    switch (key)
     {
     case 'A':
     case ('A' ^ (1 << 5)):
-        --new_x;
+        --new_pos_X;
         did_move = true;
         break;
     case 'D':
     case ('D' ^ (1 << 5)):
-        ++new_x;
+        ++new_pos_X;
         did_move = true;
         break;
     case 'W':
     case ('W' ^ (1 << 5)):
-        --new_y;
+        --new_pos_Y;
         did_move = true;
         break;
     case 'S':
     case ('S' ^ (1 << 5)):
-        ++new_y;
+        ++new_pos_Y;
         did_move = true;
         break;
-    default: break;
+    default: return false;
     }
 
-    if (!did_move || game->Map[new_y][new_x] == WALL || game->Map[new_y][new_x] == PIT)
+    if (!did_move || game->Map[new_pos_Y][new_pos_X] == WALL || game->Map[new_pos_Y][new_pos_X] == PIT)
     {
         return false;
     }
 
     ++game->MovesCount;
 
-    switch (game->Map[new_y][new_x])
+    switch (game->Map[new_pos_Y][new_pos_X])
     {
     case ROCK:
-        switch (new_x - game->PlayerX)
+        switch (key)
         {
-        case 1:
-            if (game->Map[new_y][new_x + 1] == ROAD) { game->Map[new_y][new_x + 1] = ROCK; }
-            else if (game->Map[new_y][new_x + 1] == PIT) { game->Map[new_y][new_x + 1] = ROAD; }
+        case 'A':
+        case ('A' ^ (1 << 5)):
+            if (game->Map[new_pos_Y][new_pos_X - 1] == ROAD) { game->Map[new_pos_Y][new_pos_X - 1] = ROCK; }
+            else if (game->Map[new_pos_Y][new_pos_X - 1] == PIT) { game->Map[new_pos_Y][new_pos_X - 1] = ROAD; }
             else { return false; }
             break;
-        case -1:
-            if (game->Map[new_y][new_x - 1] == ROAD) { game->Map[new_y][new_x - 1] = ROCK; }
-            else if (game->Map[new_y][new_x - 1] == PIT) { game->Map[new_y][new_x - 1] = ROAD; }
+        case 'D':
+        case ('D' ^ (1 << 5)):
+            if (game->Map[new_pos_Y][new_pos_X + 1] == ROAD) { game->Map[new_pos_Y][new_pos_X + 1] = ROCK; }
+            else if (game->Map[new_pos_Y][new_pos_X + 1] == PIT) { game->Map[new_pos_Y][new_pos_X + 1] = ROAD; }
             else { return false; }
             break;
-        default:break;
+        case 'W':
+        case ('W' ^ (1 << 5)):
+            if (game->Map[new_pos_Y - 1][new_pos_X] == ROAD) { game->Map[new_pos_Y - 1][new_pos_X] = ROCK; }
+            else if (game->Map[new_pos_Y - 1][new_pos_X] == PIT) { game->Map[new_pos_Y - 1][new_pos_X] = ROAD; }
+            else { return false; }
+            break;
+        case 'S':
+        case ('S' ^ (1 << 5)):
+            if (game->Map[new_pos_Y + 1][new_pos_X] == ROAD) { game->Map[new_pos_Y + 1][new_pos_X] = ROCK; }
+            else if (game->Map[new_pos_Y + 1][new_pos_X] == PIT) { game->Map[new_pos_Y + 1][new_pos_X] = ROAD; }
+            else { return false; }
+            break;
+        default: break;
         }
-
-        switch (new_y - game->PlayerY)
-        {
-        case 1:
-            if (game->Map[new_y + 1][new_x] == ROAD) { game->Map[new_y + 1][new_x] = ROCK; }
-            else if (game->Map[new_y + 1][new_x] == PIT) { game->Map[new_y + 1][new_x] = ROAD; }
-            else { return false; }
-            break;
-        case -1:
-            if (game->Map[new_y - 1][new_x] == ROAD) { game->Map[new_y - 1][new_x] = ROCK; }
-            else if (game->Map[new_y - 1][new_x] == PIT) { game->Map[new_y - 1][new_x] = ROAD; }
-            else { return false; }
-            break;
-        default:break;
-        }
-        game->Map[new_y][new_x] = ROAD;
-        game->PlayerX = new_x;
-        game->PlayerY = new_y;
+        game->Map[new_pos_Y][new_pos_X] = ROAD;
+        game->Player_X = new_pos_X;
+        game->Player_Y = new_pos_Y;
         break;
     case NEXT_LEVEL: Go_to_next_level(game);
-        Map_setup(game); if ((game->Myflag & IsDone)) { return false; }
+        Map_setup(game); if ((Get_Flag(&game->Myflag, Get_Isdone))) { return false; }
         break;
     default:
-        game->PlayerX = new_x;
-        game->PlayerY = new_y;
+        game->Player_X = new_pos_X;
+        game->Player_Y = new_pos_Y;
         break;
     }
-
     return true;
 }
 
 void Go_to_next_level(Strength* game)
 {
+#ifdef _WIN32
+    int passed_time = (MAX_TIME - 1) - (int)((clock() - game->Start) / CLOCKS_PER_SEC);
+
+#else
+    int passed_time = (MAX_TIME - 1) - (int)((clock() - game->Start) / LINUX_TIME);
+
+#endif
+    * (game->Score + game->CurrentLevel - 1) = ((passed_time - (game->MovesCount / (passed_time / MAX_LEVEL))) <= 0) ? 0 : (passed_time - (game->MovesCount / (passed_time / MAX_LEVEL))) * MAX_LEVEL;
     free(game->File_Name);
-    *(game->Score + game->CurrentLevel - 1) = (game->MovesCount << 2) * MAX_LEVEL;
     game->CurrentLevel++;
 }
 
@@ -335,7 +346,7 @@ void Draw_map(Strength* game)
 {
     int i;
     int j;
-    dpc_move_cursor(0, game->Height+1);
+    dpc_move_cursor(0, game->Height + 1);
     dpc_set_font_color(dpc_LIGHTMAGENTA);
     printf("Moves: %d\n", game->MovesCount);
     dpc_set_font_color(dpc_GREEN);
@@ -374,7 +385,7 @@ void Draw_map(Strength* game)
         }
         putchar('\n');
     }
-    dpc_move_cursor(game->PlayerX, game->PlayerY);
+    dpc_move_cursor(game->Player_X, game->Player_Y);
     dpc_set_font_color(dpc_WHITE);
     putchar('P');
 }
@@ -384,10 +395,10 @@ void Draw_timer(Strength* game)
 #ifdef _WIN32
     dpc_move_cursor(0, game->Height);
     dpc_set_font_color(dpc_LIGHTRED);
-    printf("Timer: %02lld", MAX_TIME-1 - (clock() - game->Start) / CLOCKS_PER_SEC);
+    printf("Timer: %02lld", MAX_TIME - 1 - (clock() - game->Start) / CLOCKS_PER_SEC);
     if ((clock() - game->Start) / CLOCKS_PER_SEC > MAX_TIME - 1)
     {
-        Set_Flag(game, Set_Isdone);
+        Set_Flag(&game->Myflag, Set_Isdone);
     }
 #else
     dpc_move_cursor(0, game->Height);
@@ -395,7 +406,7 @@ void Draw_timer(Strength* game)
     printf("Timer: %02ld", MAX_TIME - 1 - (clock() - game->Start) / LINUX_TIME);
     if ((clock() - game->Start) / LINUX_TIME > MAX_TIME - 1)
     {
-        Set_Flag(game, Set_Isdone);
+        Set_Flag(&game->Myflag, Set_Isdone);
     }
 #endif
     dpc_move_cursor(0, 0);
@@ -425,7 +436,7 @@ void Write_results(Strength* game)
     fputs(c, fp);
     fputs("\n", fp);
 
-    if ((game->Myflag & IsCleared))
+    if ((Get_Flag(&game->Myflag, Get_Iscleared)))
     {
         printf("Game Cleared!\n");
         fputs("Game Cleared!\n", fp);
@@ -434,12 +445,12 @@ void Write_results(Strength* game)
         {
             dpc_set_font_color(dpc_BLACK + i + 1);
             printf("%d Level Score: %d\n", i + 1, *(game->Score + i));
-            sprintf(c, "%d", i+1);
+            sprintf(c, "%d", i + 1);
 
             fputs(c, fp);
             fputs(" Level Score: ", fp);
             sprintf(c, "%d", *(game->Score + i));
- 
+
             fputs(c, fp);
             fputs("\n", fp);
         }

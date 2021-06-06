@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Strength)
 
-set(CMAKE_C_STANDARD_REQUIRED TRUE)
-
 if(MSVC)
     add_compile_options(/W4 /WX)
 else()
@@ -11,3 +9,10 @@ else()
 endif()
 
 add_executable(Strength main.c dp_console.c Strength.c)
+
+add_custom_command(
+    TARGET Strength POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+"${CMAKE_CURRENT_SOURCE_DIR}/assets"
+"${CMAKE_BINARY_DIR}/$<CONFIG>/assets"
+)

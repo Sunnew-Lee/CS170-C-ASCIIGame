@@ -15,23 +15,20 @@
 
 int main(void)
 {
+    Strength game = { 0 };
+    bool hide_cursor = true;
 #ifdef _WIN32
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-    Strength game = { 0 };
-    game.Map = NULL;
-    game.MovesCount = 0;
-    game.CurrentLevel = 1;
-    game.Myflag = 0;
 
-    dpc_startup(true);
+    dpc_startup(hide_cursor);
+    Read_results();
 
-    Game_intro();
     Game_setup(&game);
-
     Map_setup(&game);
     Draw_map(&game);
-    while (!(game.Myflag & IsDone))
+
+    while (!(Get_Flag(&game.Myflag, Get_Isdone)))
     {
         Draw_timer(&game);
 

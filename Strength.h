@@ -23,7 +23,7 @@ typedef enum
 
 typedef struct
 {
-    int      PlayerX, PlayerY;
+    int      Player_X, Player_Y;
     int      MovesCount;
     int      Width, Height;
     int      CurrentLevel;
@@ -34,15 +34,22 @@ typedef struct
     char*    File_Name;
 } Strength;
 
-typedef void (*FuncPtr)(Strength*);
+typedef void (*VoidFuncPtr)(char*);
+typedef bool (*BoolFuncPtr)(char*);
 
-void Set_Flag(Strength* game, FuncPtr func);
+void Set_Flag(char* myflag, VoidFuncPtr func);
 
-void Set_Isdone(Strength* game);
+bool Get_Flag(char* myflag, BoolFuncPtr func);
 
-void Set_Iscleared(Strength* game);
+void Set_Isdone(char* myflag);
+
+void Set_Iscleared(char* myflag);
+
+bool Get_Isdone(char* myflag);
  
-void Game_intro();
+bool Get_Iscleared(char* myflag);
+
+void Read_results();
 
 void Game_setup(Strength* game);
 
@@ -56,7 +63,7 @@ void Go_to_next_level(Strength* game);
 
 void Write_results(Strength* game);
 
-bool Game_update(Strength* game, int key_code);
+bool Game_update(Strength* game, int key);
 
 void Draw_timer(Strength* game);
 
