@@ -4,7 +4,7 @@
 - Project Name: ASCII Game in C
 - Course Name: CS170
 - Term: Spring 2021
-Windows command line and the Ubuntu bash shell
+
 ## 2. How to build with make
 - Type 'bash' on the folder path where all source files are at.
 - Type 'make' on the Ubuntu bash shell.
