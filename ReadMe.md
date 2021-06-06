@@ -30,10 +30,11 @@
 - Press keyboard 'Esc' to quit the game.
 
 ## 6. Section describing something you're proud of about the project
-- This assignment was so hard for me and I had no idea of what and where to start. I am so proud that I got evaluated max points.
+- I have learned C language before I went to military service, so it was a bit tough to handle C.
+- Also, the differences between windows and linux drove me nuts, but I'm proud that we made the game without any warnings.
 
 ## 7. Section describing anything incomplete about the project
-- This assignment was so hard for me and I had no idea of what and where to start. I am so proud that I got evaluated max points.
+- Some level design and more levels.
 
 ## 8. Section to Provide file name and line numbers for all code related requirements
 - [core] Have custom command line arguments
