@@ -36,7 +36,7 @@ bool Get_Iscleared(char* myflag) { return (*myflag & IsCleared); }
 void Read_results()
 {
     FILE* fp;
-    char* a = malloc(sizeof(char) * MAX_TEXT_SIZE);
+    char* container = malloc(sizeof(char) * MAX_TEXT_SIZE);
     dpc_set_font_background_color(dpc_BACKGROUND_BLACK);
 
     dpc_set_font_color(dpc_GREEN);
@@ -56,7 +56,7 @@ void Read_results()
 
     fp = fopen("assets/Results.txt", "rt");
 
-    if (a == NULL)
+    if (container == NULL)
     {
         return;
     }
@@ -67,14 +67,14 @@ void Read_results()
         printf("================================================================\n");
         dpc_set_font_color(dpc_WHITE);
         printf("Last Result\n");
-        while (!feof(fp) && fgets(a, MAX_TEXT_SIZE, fp))
+        while (!feof(fp) && fgets(container, MAX_TEXT_SIZE, fp))
         {
-            printf("%s",a);
+            printf("%s",container);
         }
         fclose(fp);
     }
 
-    free(a);
+    free(container);
     dpc_set_font_color(dpc_LIGHTGREEN);
     dpc_wait_for_anykey("Press any key to start.\n");
 }
@@ -97,14 +97,16 @@ void Game_setup(Strength* game)
 void Map_setup(Strength* game)
 {
     int i;
-    char* c1 = malloc(sizeof(char) * MAX_TEXT_SIZE);
-    char* c2 = malloc(sizeof(char) * MAX_TEXT_SIZE);
+    char* file_middle = malloc(sizeof(char) * MAX_TEXT_SIZE);
+    char* file_last = malloc(sizeof(char) * MAX_TEXT_SIZE);
 
     if (game->CurrentLevel > MAX_LEVEL)
     {
         game->CurrentLevel = MAX_LEVEL;
         Set_Flag(&game->Myflag, Set_Isdone);
         Set_Flag(&game->Myflag, Set_Iscleared);
+        free(file_middle);
+        free(file_last);
         return;
     }
 
@@ -117,12 +119,12 @@ void Map_setup(Strength* game)
         free(game->Map);
     }
 
-    if (c1 == NULL)
+    if (file_middle == NULL)
     {
         printf("There is No File. \n");
         return;
     }
-    if (c2 == NULL)
+    if (file_last == NULL)
     {
         printf("There is No File. \n");
         return;
@@ -135,24 +137,25 @@ void Map_setup(Strength* game)
     }
 
     strcpy(game->File_Name, "assets/Map");
-    sprintf(c1, "%d", game->CurrentLevel);
-    strcpy(c2, ".txt");
+    sprintf(file_middle, "%d", game->CurrentLevel);
+    strcpy(file_last, ".txt");
 
-    strcat(game->File_Name, c1);
-    free(c1);
-    strcat(game->File_Name, c2);
-    free(c2);
+    strcat(game->File_Name, file_middle);
+    free(file_middle);
+    strcat(game->File_Name, file_last);
+    free(file_last);
 
     Create_map(game);
     Map_reset(game);
     game->Start = clock();
+    game->MovesCount = 0;
 }
 
 void Create_map(Strength* game)
 {
     int i;
     FILE* fp;
-    char* a = malloc(sizeof(char) * MAX_TEXT_SIZE);
+    char* container = malloc(sizeof(char) * MAX_TEXT_SIZE);
 
     fp = fopen(game->File_Name, "rt");
     
@@ -166,14 +169,14 @@ void Create_map(Strength* game)
     {
         while (!feof(fp))
         {
-            a=fgets(a, MAX_TEXT_SIZE, fp);
+            container=fgets(container, MAX_TEXT_SIZE, fp);
 
-            if (atoi(a) != 0)
+            if (atoi(container) != 0)
             {
-                game->Width = atoi(a);
-                a=fgets(a, MAX_TEXT_SIZE, fp);
-                a=fgets(a, MAX_TEXT_SIZE, fp);
-                game->Height = atoi(a);
+                game->Width = atoi(container);
+                container=fgets(container, MAX_TEXT_SIZE, fp);
+                container=fgets(container, MAX_TEXT_SIZE, fp);
+                game->Height = atoi(container);
             }
         }
     }
@@ -198,7 +201,7 @@ void Create_map(Strength* game)
         }
     }
 
-    free(a);
+    free(container);
     fclose(fp);
 }
 
@@ -228,7 +231,6 @@ void Map_reset(Strength* game)
         }
     }
     fclose(fp);
-    game->MovesCount = 0;
 }
 
 
@@ -336,7 +338,7 @@ void Go_to_next_level(Strength* game)
     int passed_time = (MAX_TIME - 1) - (int)((clock() - game->Start) / LINUX_TIME);
 
 #endif
-    * (game->Score + game->CurrentLevel - 1) = ((passed_time - (game->MovesCount / (passed_time / MAX_LEVEL))) <= 0) ? 0 : (passed_time - (game->MovesCount / (passed_time / MAX_LEVEL))) * MAX_LEVEL;
+    * (game->Score + game->CurrentLevel - 1) = ((passed_time - (game->MovesCount / ((passed_time / MAX_LEVEL) + 1))) <= 0) ? 0 : (passed_time - (game->MovesCount / ((passed_time / MAX_LEVEL) + 1))) * MAX_LEVEL;
     free(game->File_Name);
     game->CurrentLevel++;
 }
@@ -415,7 +417,8 @@ void Write_results(Strength* game)
 {
     FILE* fp;
     int i;
-    char* c = malloc(sizeof(char) * MAX_TEXT_SIZE);
+    int flag=(!Get_Flag(&game->Myflag, Get_Iscleared));
+    char* container = malloc(sizeof(char) * MAX_TEXT_SIZE);
 
     dpc_clear_console_screen();
     dpc_set_font_color(dpc_YELLOW);
@@ -430,48 +433,36 @@ void Write_results(Strength* game)
 
     printf("Top Level: %d\n", game->CurrentLevel);
     fputs("Top Level: ", fp);
-    sprintf(c, "%d", game->CurrentLevel);
+    sprintf(container, "%d", game->CurrentLevel);
 
-    fputs(c, fp);
+    fputs(container, fp);
     fputs("\n", fp);
 
     if ((Get_Flag(&game->Myflag, Get_Iscleared)))
     {
         printf("Game Cleared!\n");
         fputs("Game Cleared!\n", fp);
-
-        for (i = 0; i < game->CurrentLevel; i++)
-        {
-            dpc_set_font_color(dpc_BLACK + i + 1);
-            printf("%d Level Score: %d\n", i + 1, *(game->Score + i));
-            sprintf(c, "%d", i + 1);
-
-            fputs(c, fp);
-            fputs(" Level Score: ", fp);
-            sprintf(c, "%d", *(game->Score + i));
-
-            fputs(c, fp);
-            fputs("\n", fp);
-        }
     }
     else
     {
-        for (i = 0; i < game->CurrentLevel - 1; i++)
-        {
-            dpc_set_font_color(dpc_BLACK + i + 1);
-            printf("%d Level Score: %d\n", i + 1, *(game->Score + i));
-            sprintf(c, "%d", i + 1);
-
-            fputs(c, fp);
-            fputs(" Level Score: ", fp);
-            sprintf(c, "%d", *(game->Score + i));
-
-            fputs(c, fp);
-            fputs("\n", fp);
-        }
         free(game->File_Name);
     }
-    free(c);
+
+    for (i = 0; i < game->CurrentLevel - flag; i++)
+    {
+        dpc_set_font_color(dpc_BLACK + i + 1);
+        printf("%d Level Score: %d\n", i + 1, *(game->Score + i));
+        sprintf(container, "%d", i + 1);
+
+        fputs(container, fp);
+        fputs(" Level Score: ", fp);
+        sprintf(container, "%d", *(game->Score + i));
+
+        fputs(container, fp);
+        fputs("\n", fp);
+    }
+
+    free(container);
     free(game->Score);
     fclose(fp);
     dpc_set_font_color(dpc_WHITE);
