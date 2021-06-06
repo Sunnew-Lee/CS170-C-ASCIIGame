@@ -1,9 +1,9 @@
 /*
-    sunwoo.lee
-    ASCII Game
-    CS170
-    Spring 2021
-*/
+ * hyun.kang / sunwoo.lee
+ * ASCII Game in C Assignment
+ * CS170
+ * Spring 2021
+ */
 #pragma once
 
 #include <stdbool.h>

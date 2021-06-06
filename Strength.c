@@ -1,11 +1,9 @@
 /*
-    sunwoo.lee
-    ASCII Game
-    CS170
-    Spring 2021
-*/
-
-
+ * hyun.kang / sunwoo.lee
+ * ASCII Game in C Assignment
+ * CS170
+ * Spring 2021
+ */
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_WARNINGS
 #define MAX_TEXT_SIZE 100
@@ -13,11 +11,12 @@
 #define MAX_TIME 100
 #define ESCAPE 27
 #define LINUX_TIME 187500
-#include "Strength.h"
-#include "dp_console.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "Strength.h"
+#include "dp_console.h"
 
 char IsDone=1<<0;
 char IsCleared=1<<1;
