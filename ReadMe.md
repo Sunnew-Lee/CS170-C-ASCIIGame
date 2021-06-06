@@ -39,11 +39,11 @@
 - [core] Have custom command line arguments
     - CMakeLists.txt - line 13
 - [core] Make good use of arrays
-    - Strength.c - line 185 
+    - Strength.c - line 188 
 - [core] Use Bitwise operations to create a some kind of configuration variable where you extract values.
     - Strength.c - line 28, 30, 32, 34 
 - [core] When applicable, use bitwise operations to replace Arithmetic Operations
-    - Strength.c - line 255, 260, 265, 270 
+    - Strength.c - line 257, 262, 267, 272 
 - [core] Make good use of struct
     - Strength.h - line 24 
 - [core] Make good use of malloc()/free()
@@ -53,10 +53,10 @@
 - [core] Make good use of #define for number literals
     - Strength.c - line 9, 10, 11, 12, 13 
 - [core] Make good use of C File IO
-    - Strength.c - line 57, 157 
+    - Strength.c - line 57, 160 
 - [core] Make good use of Function Pointers
     - Strength.c - line 24, 26 
 - Kept global variables to a minimum
     - main.c - line 18 
 - Reused functions as much as possible.
-    - Strength.c - line 147,  248, 320
+    - Strength.c - line 149, 250, 322
