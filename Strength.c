@@ -41,12 +41,19 @@ void Read_results(int argc, char* argv[])
     dpc_set_font_background_color(dpc_BACKGROUND_BLACK);
 
     dpc_set_font_color(dpc_GREEN);
-    printf("Player Name:\t");
+    if(argc>1)
+    {
+        printf("Player Name:\t");
+    }
+
     for( i = 1; i < argc; i++ )
     {
         printf("%s\t",argv[i]);
     }
-    printf("\n");
+    if(argc>1)
+    {
+        printf("\n");
+    }
 
     printf("Title:\t\tGame of Strength\n");
     printf("How to play:\tUse WASD to move, R to reset level, ESC to quit.\n");
@@ -439,13 +446,19 @@ void Write_results(int argc, char* argv[],Strength* game)
 
     fp = fopen("assets/Results.txt", "wt");
 
-    fputs("Player Name: ", fp);
+    if(argc>1)
+    {
+        fputs("Player Name: ", fp);
+    }
     for( i = 1; i < argc; i++ )
     {
         fputs(argv[i],fp);
         fputs(" ",fp);
     }
-    fputs("\n",fp);
+    if(argc>1)
+    {
+        fputs("\n",fp);
+    }
 
     printf("Top Level: %d\n", game->CurrentLevel);
     fputs("Top Level: ", fp);
