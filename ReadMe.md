@@ -38,7 +38,7 @@
 
 ## 8. Section to Provide file name and line numbers for all code related requirements
 - [core] Have custom command line arguments
-    - CMakeLists.txt - line 13
+    - main.c - line 16
 - [core] Make good use of arrays
     - Strength.c - line 188 
 - [core] Use Bitwise operations to create a some kind of configuration variable where you extract values.
