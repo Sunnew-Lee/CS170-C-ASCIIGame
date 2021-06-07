@@ -13,7 +13,7 @@
 #include "dp_console.h"
 #include "Strength.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
     Strength game = { 0 };
     bool hide_cursor = true;
@@ -22,7 +22,8 @@ int main(void)
 #endif
 
     dpc_startup(hide_cursor);
-    Read_results();
+
+    Read_results(argc, argv);
 
     Game_setup(&game);
     Map_setup(&game);
@@ -39,6 +40,6 @@ int main(void)
         dpc_flush();
     }
 
-    Write_results(&game);
+    Write_results(argc, argv,&game);
     return 0;
 }

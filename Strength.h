@@ -49,7 +49,7 @@ bool Get_Isdone(char* myflag);
  
 bool Get_Iscleared(char* myflag);
 
-void Read_results();
+void Read_results(int argc, char* argv[]);
 
 void Game_setup(Strength* game);
 
@@ -61,7 +61,7 @@ void Map_reset(Strength* game);
 
 void Go_to_next_level(Strength* game);
 
-void Write_results(Strength* game);
+void Write_results(int argc, char* argv[],Strength* game);
 
 bool Game_update(Strength* game, int key);
 
